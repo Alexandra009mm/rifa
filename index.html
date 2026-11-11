@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rifa 30 de Noviembre</title>
+<style>
+  :root{--azul:#5b7fe6;--azul-osc:#2f4fb3;--fondo:#eef4ff;--texto:#1f2a44;--verde:#22a06b;--rojo:#e05252}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--fondo);color:var(--texto)}
+  header{background:linear-gradient(135deg,var(--azul),var(--azul-osc));color:#fff;padding:26px 16px;text-align:center}
+  header h1{margin:0;font-size:2.1rem;letter-spacing:1px}
+  header p{margin:6px 0 0;opacity:.9}
+  .wrap{max-width:1040px;margin:0 auto;padding:20px 16px;display:grid;gap:20px;grid-template-columns:320px 1fr}
+  @media(max-width:820px){.wrap{grid-template-columns:1fr}}
+  .card{background:#fff;border-radius:16px;padding:18px;box-shadow:0 4px 18px rgba(31,42,68,.08)}
+  .premio img,.afiche img{width:100%;border-radius:12px;display:block}
+  .info{margin-top:12px;font-size:.95rem;line-height:1.7}
+  .afiche{margin-top:20px}
+  .afiche b{display:block;margin-bottom:10px}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+  .stat{background:#fff;border-radius:14px;padding:14px 10px;text-align:center;box-shadow:0 4px 18px rgba(31,42,68,.08)}
+  .stat b{display:block;font-size:1.4rem;color:var(--azul-osc)}
+  .stat span{font-size:.8rem;opacity:.7}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  input[type=text]{flex:1;min-width:180px;padding:10px 12px;border:1px solid #cdd6ea;border-radius:10px;font-size:1rem}
+  input[type=text]:focus{outline:2px solid var(--azul);border-color:transparent}
+  button{padding:10px 14px;border:0;border-radius:10px;background:var(--azul);color:#fff;font-size:.95rem;cursor:pointer}
+  button.sec{background:#e4eaf8;color:var(--texto)}
+  button.peligro{background:var(--rojo)}
+  button:hover{filter:brightness(.95)}
+  .leyenda{font-size:.85rem;margin-bottom:12px;display:flex;gap:16px}
+  .dot{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:6px;vertical-align:middle}
+  .grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
+  .num{aspect-ratio:1;border:0;border-radius:10px;background:#f4f7fd;color:var(--texto);font-weight:600;font-size:1rem;padding:0;transition:opacity .2s}
+  .num.vendido{background:var(--verde);color:#fff}
+  .num.resaltado{outline:3px solid #ffb703;outline-offset:1px}
+  .num.oculto{opacity:.2}
+  h2{font-size:1.1rem;margin:0 0 12px}
+  table{width:100%;border-collapse:collapse;font-size:.95rem}
+  td{padding:9px 8px;border-bottom:1px solid #e6ecf7}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;padding:16px}
+  .modal.abierto{display:flex}
+  .modal .card{width:100%;max-width:360px}
+  .modal h3{margin:0 0 4px;font-size:1.2rem}
+  .modal input{width:100%;margin:12px 0}
+  .acciones{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>RIFA 30 DE NOVIEMBRE</h1>
+  <p>Premio: una licuadora Imusa · Valor $10.000 por número</p>
+</header>
+
+<div class="wrap">
+  <aside>
+    <div class="card premio">
+      <img src="img/premio.png" alt="Licuadora Imusa Ultraforce">
+      <div class="info">
+        <div><b>Premio:</b> Licuadora Imusa Ultraforce</div>
+        <div><b>Valor:</b> $10.000 por número</div>
+        <div><b>Sorteo:</b> 30 de noviembre</div>
+        <div><b>Nequi:</b> 3002521113</div>
+        <div id="titular"></div>
+      </div>
+    </div>
+    <div class="card afiche">
+      <b>Afiche para publicar</b>
+      <img src="img/afiche.png" alt="Afiche de la rifa">
+    </div>
+  </aside>
+
+  <main>
+    <div class="stats">
+      <div class="stat"><b id="vendidos">0</b><span>Vendidos</span></div>
+      <div class="stat"><b id="disponibles">100</b><span>Disponibles</span></div>
+      <div class="stat"><b id="recaudado">$0</b><span>Recaudado</span></div>
+    </div>
+
+    <div class="card">
+      <div class="toolbar">
+        <input type="text" id="buscar" placeholder="Buscar por nombre...">
+        <button class="sec" onclick="limpiarBusqueda()">Limpiar</button>
+        <button class="sec" onclick="copiarLista()">Copiar lista</button>
+        <button class="peligro" onclick="limpiarTodo()">Reiniciar</button>
+      </div>
+      <div class="leyenda">
+        <span><i class="dot" style="background:#f4f7fd;border:1px solid #cdd6ea"></i>Disponible</span>
+        <span><i class="dot" style="background:var(--verde)"></i>Vendido</span>
+      </div>
+      <div class="grid" id="grid"></div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+      <h2>Compradores</h2>
+      <table><tbody id="lista"></tbody></table>
+    </div>
+  </main>
+</div>
+
+<div class="modal" id="modal" onclick="if(event.target===this)cerrar()">
+  <div class="card">
+    <h3 id="modalTitulo"></h3>
+    <div style="color:#6b7790;font-size:.9rem">Escribe el nombre del comprador</div>
+    <input type="text" id="nombre" placeholder="Nombre del comprador">
+    <div class="acciones">
+      <button id="liberar" class="peligro" onclick="liberar()">Liberar</button>
+      <button class="sec" onclick="cerrar()">Cancelar</button>
+      <button onclick="guardarNombre()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Escribe aquí el nombre del titular de la cuenta Nequi (opcional)
+  const TITULAR = "";
+  const PRECIO = 10000;
+  const KEY = "rifa-30-nov";
+
+  let ventas = JSON.parse(localStorage.getItem(KEY) || "{}");
+  let actual = null;
+  const $ = id => document.getElementById(id);
+
+  function guardar() {
+    localStorage.setItem(KEY, JSON.stringify(ventas));
+    render();
+  }
+
+  function escapar(t) {
+    return String(t).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+
+  function render() {
+    const q = $("buscar").value.trim().toLowerCase();
+    const grid = $("grid");
+    grid.innerHTML = "";
+
+    for (let i = 0; i < 100; i++) {
+      const n = String(i).padStart(2, "0");
+      const nombre = ventas[n] || "";
+      const coincide = q && nombre.toLowerCase().includes(q);
+      const b = document.createElement("button");
+      b.className = "num";
+      if (nombre) b.classList.add("vendido");
+      if (coincide) b.classList.add("resaltado");
+      if (q && !coincide) b.classList.add("oculto");
+      b.textContent = n;
+      b.title = nombre || "Disponible";
+      b.onclick = () => abrir(n);
+      grid.appendChild(b);
+    }
+
+    const vendidos = Object.keys(ventas).length;
+    $("vendidos").textContent = vendidos;
+    $("disponibles").textContent = 100 - vendidos;
+    $("recaudado").textContent = "$" + (vendidos * PRECIO).toLocaleString("es-CO");
+
+    const filas = Object.keys(ventas).sort()
+      .map(n => `<tr><td><b>${n}</b></td><td>${escapar(ventas[n])}</td></tr>`).join("");
+    $("lista").innerHTML = filas || '<tr><td style="opacity:.6">Aún no hay números vendidos</td></tr>';
+  }
+
+  function abrir(n) {
+    actual = n;
+    $("modalTitulo").textContent = "Número " + n;
+    $("nombre").value = ventas[n] || "";
+    $("liberar").style.display = ventas[n] ? "inline-block" : "none";
+    $("modal").classList.add("abierto");
+    $("nombre").focus();
+  }
+
+  function cerrar() {
+    $("modal").classList.remove("abierto");
+  }
+
+  function guardarNombre() {
+    const v = $("nombre").value.trim();
+    if (!v) return;
+    ventas[actual] = v;
+    cerrar();
+    guardar();
+  }
+
+  function liberar() {
+    if (confirm(`¿Liberar el número ${actual}?`)) {
+      delete ventas[actual];
+      cerrar();
+      guardar();
+    }
+  }
+
+  function limpiarBusqueda() {
+    $("buscar").value = "";
+    render();
+  }
+
+  function copiarLista() {
+    const texto = Object.keys(ventas).sort().map(n => `${n} - ${ventas[n]}`).join("\n");
+    navigator.clipboard.writeText(texto || "Sin ventas")
+      .then(() => alert("Lista copiada"))
+      .catch(() => alert(texto || "Sin ventas"));
+  }
+
+  function limpiarTodo() {
+    if (confirm("¿Borrar TODAS las ventas? Esta acción no se puede deshacer.")) {
+      ventas = {};
+      guardar();
+    }
+  }
+
+  $("nombre").addEventListener("keydown", e => { if (e.key === "Enter") guardarNombre(); });
+  $("buscar").addEventListener("input", render);
+  if (TITULAR) $("titular").innerHTML = `<b>Titular:</b> ${escapar(TITULAR)}`;
+  render();
+</script>
+</body>
+</html>
