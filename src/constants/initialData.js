@@ -1,0 +1,77 @@
+/**
+ * Initial participants list provided by the user.
+ * Preserves the active raffle records and marks previously checked participants as paid.
+ */
+const TICKET_PRICE = 10000;
+const TOTAL_TICKETS = 100;
+
+const INITIAL_PARTICIPANTS = [
+  { number: '00', name: 'Candelaria', status: 'pendiente', amountPaid: 0 },
+  { number: '01', name: 'Claudia', status: 'pendiente', amountPaid: 0 },
+  { number: '02', name: 'Hijo 🥰', status: 'pendiente', amountPaid: 0 },
+  { number: '03', name: 'Anyela', status: 'pendiente', amountPaid: 0 },
+  { number: '04', name: 'Britney', status: 'pendiente', amountPaid: 0 },
+  { number: '05', name: 'Vivi', status: 'pagado', amountPaid: 10000 },
+  { number: '06', name: 'Milagro', status: 'pendiente', amountPaid: 0 },
+  { number: '07', name: 'Diosimar', status: 'pendiente', amountPaid: 0 },
+  { number: '08', name: 'Yesiris', status: 'pendiente', amountPaid: 0 },
+  { number: '09', name: 'Marta puente', status: 'pendiente', amountPaid: 0 },
+  { number: '10', name: 'Julio❤️', status: 'pendiente', amountPaid: 0 },
+  { number: '11', name: 'Leniz', status: 'pendiente', amountPaid: 0 },
+  { number: '12', name: 'Vivi', status: 'pagado', amountPaid: 10000 },
+  { number: '13', name: 'Julio❤️', status: 'pendiente', amountPaid: 0 },
+  { number: '14', name: 'Flor', status: 'pagado', amountPaid: 10000 },
+  { number: '15', name: 'Marta puente', status: 'pendiente', amountPaid: 0 },
+  { number: '17', name: 'Julio❤️', status: 'pendiente', amountPaid: 0 },
+  { number: '20', name: 'Luciana', status: 'pendiente', amountPaid: 0 },
+  { number: '21', name: 'Aide', status: 'pendiente', amountPaid: 0 },
+  { number: '22', name: 'Katy martinez', status: 'pendiente', amountPaid: 0 },
+  { number: '23', name: 'Chucho', status: 'pendiente', amountPaid: 0 },
+  { number: '24', name: 'Sivied', status: 'pendiente', amountPaid: 0 },
+  { number: '26', name: 'Miriam', status: 'pendiente', amountPaid: 0 },
+  { number: '27', name: 'Doris', status: 'pendiente', amountPaid: 0 },
+  { number: '29', name: 'Vivi', status: 'pagado', amountPaid: 10000 },
+  { number: '30', name: 'Denis', status: 'pendiente', amountPaid: 0 },
+  { number: '31', name: 'Yésica galleta', status: 'pendiente', amountPaid: 0 },
+  { number: '33', name: 'Julio❤️', status: 'pendiente', amountPaid: 0 },
+  { number: '37', name: 'Lily', status: 'pendiente', amountPaid: 0 },
+  { number: '38', name: 'Julio❤️', status: 'pendiente', amountPaid: 0 },
+  { number: '40', name: 'Esledi', status: 'pendiente', amountPaid: 0 },
+  { number: '45', name: 'Heidy💕', status: 'pendiente', amountPaid: 0 },
+  { number: '47', name: 'Candelaria', status: 'pendiente', amountPaid: 0 },
+  { number: '48', name: 'Heidy💕', status: 'pendiente', amountPaid: 0 },
+  { number: '52', name: 'Heidy 💕', status: 'pendiente', amountPaid: 0 },
+  { number: '55', name: 'Vecino Jorge', status: 'pagado', amountPaid: 10000 },
+  { number: '56', name: 'Julio ❤️', status: 'pendiente', amountPaid: 0 },
+  { number: '57', name: 'Julio ❤️', status: 'pendiente', amountPaid: 0 },
+  { number: '63', name: 'Cande', status: 'pendiente', amountPaid: 0 },
+  { number: '64', name: 'Ledis', status: 'pendiente', amountPaid: 0 },
+  { number: '66', name: 'Didier', status: 'pendiente', amountPaid: 0 },
+  { number: '67', name: 'Magola', status: 'pendiente', amountPaid: 0 },
+  { number: '68', name: 'Linda', status: 'pendiente', amountPaid: 0 },
+  { number: '69', name: 'Valeri Avila', status: 'pendiente', amountPaid: 0 },
+  { number: '72', name: 'Valentina cabas', status: 'pendiente', amountPaid: 0 },
+  { number: '73', name: 'María José', status: 'pendiente', amountPaid: 0 },
+  { number: '74', name: 'Carmencita', status: 'pendiente', amountPaid: 0 },
+  { number: '76', name: 'Salvadora', status: 'pendiente', amountPaid: 0 },
+  { number: '77', name: 'Julio❤️', status: 'pendiente', amountPaid: 0 },
+  { number: '78', name: 'Yesiris', status: 'pendiente', amountPaid: 0 },
+  { number: '83', name: 'Heidy💕', status: 'pendiente', amountPaid: 0 },
+  { number: '84', name: 'Josué 1', status: 'pendiente', amountPaid: 0 },
+  { number: '85', name: 'Niño', status: 'pendiente', amountPaid: 0 },
+  { number: '87', name: 'Mary cruz', status: 'pendiente', amountPaid: 0 },
+  { number: '88', name: 'Julio ❤️', status: 'pendiente', amountPaid: 0 },
+  { number: '89', name: 'Heidy 💕', status: 'pendiente', amountPaid: 0 },
+  { number: '90', name: 'Chino vecino', status: 'pendiente', amountPaid: 0 },
+  { number: '93', name: 'Waso', status: 'pendiente', amountPaid: 0 },
+  { number: '95', name: 'Yenny', status: 'pendiente', amountPaid: 0 },
+  { number: '97', name: 'Lily', status: 'pendiente', amountPaid: 0 },
+  { number: '98', name: 'Monica', status: 'pendiente', amountPaid: 0 },
+  { number: '99', name: 'Julio ❤️', status: 'pendiente', amountPaid: 0 }
+];
+
+module.exports = {
+  TICKET_PRICE,
+  TOTAL_TICKETS,
+  INITIAL_PARTICIPANTS
+};
