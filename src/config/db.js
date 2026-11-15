@@ -2,7 +2,14 @@ const { Pool } = require('pg');
 require('dotenv').config();
 const { TOTAL_TICKETS, INITIAL_PARTICIPANTS } = require('../constants/initialData');
 
-const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+// Flexible connection string detection for Vercel, Supabase, Neon, and Docker
+const connectionString = 
+  process.env.POSTGRES_URL || 
+  process.env.POSTGRES_PRISMA_URL || 
+  process.env.POSTGRES_URL_NON_POOLING || 
+  process.env.DATABASE_URL || 
+  process.env.STORAGE_URL || 
+  process.env.SUPABASE_POSTGRES_URL;
 
 // Determine if SSL is required (cloud databases like Neon, Supabase, Vercel Postgres require SSL)
 const isCloudPostgres = Boolean(
@@ -20,11 +27,12 @@ const pool = new Pool(
         ssl: isCloudPostgres ? { rejectUnauthorized: false } : false,
       }
     : {
-        host: process.env.DB_HOST || 'localhost',
-        port: parseInt(process.env.DB_PORT || '5432', 10),
-        user: process.env.DB_USER || 'postgres',
-        password: process.env.DB_PASSWORD || 'postgres',
-        database: process.env.DB_NAME || 'rifa',
+        host: process.env.POSTGRES_HOST || process.env.DB_HOST || 'localhost',
+        port: parseInt(process.env.POSTGRES_PORT || process.env.DB_PORT || '5432', 10),
+        user: process.env.POSTGRES_USER || process.env.DB_USER || 'postgres',
+        password: process.env.POSTGRES_PASSWORD || process.env.DB_PASSWORD || 'postgres',
+        database: process.env.POSTGRES_DATABASE || process.env.DB_NAME || 'rifa',
+        ssl: isCloudPostgres ? { rejectUnauthorized: false } : false,
       }
 );
 
