@@ -2,10 +2,23 @@ const { Pool } = require('pg');
 require('dotenv').config();
 const { TOTAL_TICKETS, INITIAL_PARTICIPANTS } = require('../constants/initialData');
 
-// Configure connection pool with fallback values
+const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+
+// Determine if SSL is required (cloud databases like Neon, Supabase, Vercel Postgres require SSL)
+const isCloudPostgres = Boolean(
+  connectionString &&
+  !connectionString.includes('localhost') &&
+  !connectionString.includes('127.0.0.1') &&
+  !connectionString.includes('@db:')
+);
+
+// Configure connection pool with fallback values and cloud SSL support
 const pool = new Pool(
-  process.env.DATABASE_URL
-    ? { connectionString: process.env.DATABASE_URL }
+  connectionString
+    ? {
+        connectionString,
+        ssl: isCloudPostgres ? { rejectUnauthorized: false } : false,
+      }
     : {
         host: process.env.DB_HOST || 'localhost',
         port: parseInt(process.env.DB_PORT || '5432', 10),
@@ -25,9 +38,12 @@ const query = (text, params) => pool.query(text, params);
 
 /**
  * Connects to PostgreSQL with exponential backoff retries.
- * Essential for docker-compose environments where the db might take seconds to start.
+ * Adapts retry attempts for serverless (Vercel) vs Docker environments.
  */
-async function connectWithRetry(retries = 10, delay = 2000) {
+async function connectWithRetry(
+  retries = process.env.VERCEL ? 2 : 10,
+  delay = process.env.VERCEL ? 500 : 2000
+) {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const client = await pool.connect();

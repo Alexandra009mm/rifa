@@ -14,8 +14,8 @@ test('Initial participants validation', () => {
   assert.equal(candelaria00.name, 'Candelaria');
   assert.equal(candelaria00.status, 'pendiente');
 
-  // Verify buyers previously marked with checkmarks are initialized as paid
-  const paidNumbers = ['05', '12', '14', '29', '55'];
+  // Verify buyers previously marked with checkmarks and latest updates are initialized as paid
+  const paidNumbers = ['05', '12', '14', '29', '55', '69', '72'];
   for (const num of paidNumbers) {
     const item = INITIAL_PARTICIPANTS.find(p => p.number === num);
     assert.ok(item, `Number ${num} must exist in initial participants`);
