@@ -1,0 +1,35 @@
+{
+  "name": "rifa-app",
+  "version": "1.0.0",
+  "description": "Collaborative raffle management web app with PostgreSQL persistence and payment status tracking",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test tests/ticketLogic.test.js",
+    "test:integration": "node --test tests/apiIntegration.test.js",
+    "test:all": "node --test tests/**/*.test.js",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  },
+  "keywords": [
+    "raffle",
+    "rifa",
+    "postgres",
+    "express",
+    "docker"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "supertest": "^7.0.0"
+  }
+}
