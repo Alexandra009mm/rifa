@@ -1,0 +1,44 @@
+# Docker Compose configuration for multi-device Raffle application with PostgreSQL persistence
+services:
+  # PostgreSQL database service
+  db:
+    image: postgres:16-alpine
+    container_name: rifa-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: rifa
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d rifa"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  # Node.js backend application service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rifa-app
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/rifa
+      TICKET_PRICE: 10000
+      TOTAL_TICKETS: 100
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+    driver: local
