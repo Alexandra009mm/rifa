@@ -31,6 +31,9 @@
     } catch (err) {
       console.error('Failed to load data:', err);
       UI.showToast(err.message || 'Error de conexión con el servidor', 'error');
+      if (tickets.length === 0) {
+        UI.renderError(err.message || 'Error de conexión con la base de datos', () => loadData(true));
+      }
     }
   }
 

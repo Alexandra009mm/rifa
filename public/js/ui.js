@@ -25,6 +25,28 @@ const UI = {
   },
 
   /**
+   * Renders a friendly error banner in the grid and table if connection fails
+   */
+  renderError(message, onRetry) {
+    const grid = document.getElementById('grid');
+    if (grid) {
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; padding: 24px; text-align: center; background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; color: #991b1b;">
+          <h4 style="margin: 0 0 8px; font-size: 1.1rem;">⚠️ Esperando conexión con la base de datos</h4>
+          <p style="margin: 0 0 14px; font-size: 0.9rem; color: #7f1d1d;">${this.escape(message)}</p>
+          <button type="button" class="sec" id="btn-grid-retry" style="background:#ffffff; color:#991b1b; border:1px solid #fca5a5; font-size: 0.85rem; padding: 8px 16px;">🔄 Reintentar conexión</button>
+        </div>
+      `;
+      document.getElementById('btn-grid-retry')?.addEventListener('click', onRetry);
+    }
+
+    const tbody = document.getElementById('lista');
+    if (tbody) {
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#991b1b; padding:20px;">No se pudieron cargar los compradores. Haz clic en "Reintentar conexión" arriba.</td></tr>`;
+    }
+  },
+
+  /**
    * Displays temporary floating toast notification
    */
   showToast(message, type = 'success') {
@@ -147,7 +169,13 @@ const UI = {
     });
 
     if (soldTickets.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#64748b;padding:20px;">No se encontraron compradores con los filtros actuales.</td></tr>';
+      let emptyMsg = 'No se encontraron compradores con los filtros actuales.';
+      if (activeFilter === 'abono') {
+        emptyMsg = 'No hay compradores con <b>abonos parciales</b> registrados todavía. Haz clic en la pestaña <b>"Todos"</b> para ver los compradores.';
+      } else if (activeFilter === 'pagado') {
+        emptyMsg = 'No hay compradores marcados como pagados con este filtro.';
+      }
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#64748b;padding:20px;">${emptyMsg}</td></tr>`;
       return;
     }
 
