@@ -42,7 +42,12 @@ const pool = new Pool(
  * @param {Array} params - Query parameters
  * @returns {Promise<import('pg').QueryResult>}
  */
-const query = (text, params) => pool.query(text, params);
+const query = (text, params) => {
+  if (process.env.VERCEL && !connectionString && !process.env.POSTGRES_HOST && !process.env.DB_HOST) {
+    throw new Error('Falta configurar la base de datos en Vercel. Si acabas de vincular Supabase, realiza un "Redeploy" en Vercel para activar las variables.');
+  }
+  return pool.query(text, params);
+};
 
 /**
  * Connects to PostgreSQL with exponential backoff retries.
@@ -52,6 +57,9 @@ async function connectWithRetry(
   retries = process.env.VERCEL ? 2 : 10,
   delay = process.env.VERCEL ? 500 : 2000
 ) {
+  if (process.env.VERCEL && !connectionString && !process.env.POSTGRES_HOST && !process.env.DB_HOST) {
+    throw new Error('Falta configurar la base de datos en Vercel. Si acabas de vincular Supabase, realiza un "Redeploy" en Vercel para activar las variables.');
+  }
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const client = await pool.connect();
