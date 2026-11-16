@@ -10,6 +10,7 @@
     "test": "node --test tests/ticketLogic.test.js",
     "test:integration": "node --test tests/apiIntegration.test.js",
     "test:all": "node --test tests/**/*.test.js",
+    "db:seed:remote": "node scripts/migrateToSupabase.js",
     "docker:up": "docker compose up -d --build",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f"

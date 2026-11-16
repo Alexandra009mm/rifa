@@ -3,13 +3,32 @@ require('dotenv').config();
 const { TOTAL_TICKETS, INITIAL_PARTICIPANTS } = require('../constants/initialData');
 
 // Flexible connection string detection for Vercel, Supabase, Neon, and Docker
-const connectionString = 
+const rawConnectionString = 
   process.env.POSTGRES_URL || 
   process.env.POSTGRES_PRISMA_URL || 
   process.env.POSTGRES_URL_NON_POOLING || 
   process.env.DATABASE_URL || 
   process.env.STORAGE_URL || 
   process.env.SUPABASE_POSTGRES_URL;
+
+/**
+ * Normalizes connection strings, automatically converting direct Supabase IPv6-only
+ * hostnames (db.<ref>.supabase.co) into pooler hostnames (aws-0-us-east-1.pooler.supabase.com)
+ * to ensure seamless IPv4 compatibility across all hosting environments and local networks.
+ */
+function normalizeConnectionString(rawUri) {
+  if (!rawUri) return rawUri;
+  const directMatch = rawUri.match(/^postgresql:\/\/([^:]+):([^@]+)@db\.([a-zA-Z0-9_-]+)\.supabase\.co(?::(\d+))?\/([^\s?]+)(.*)$/);
+  if (directMatch) {
+    const [, user, password, projectRef, port, dbName, queryParams] = directMatch;
+    const poolerUser = user === 'postgres' ? `postgres.${projectRef}` : user;
+    const poolerPort = port || '5432';
+    return `postgresql://${poolerUser}:${password}@aws-0-us-east-1.pooler.supabase.com:${poolerPort}/${dbName}${queryParams || ''}`;
+  }
+  return rawUri;
+}
+
+const connectionString = normalizeConnectionString(rawConnectionString);
 
 // Determine if SSL is required (cloud databases like Neon, Supabase, Vercel Postgres require SSL)
 const isCloudPostgres = Boolean(
